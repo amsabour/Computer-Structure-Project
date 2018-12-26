@@ -546,6 +546,7 @@ void moveDown(Item item){
 
 void gameOverScreen(){
   // Game is over. Do something cool.
+  // TODO MOOSIO
   delay(1000);
   clearScreen();
 }

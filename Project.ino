@@ -1,10 +1,12 @@
 #include "LedControl.h"
 
+#define PIN7 7
+
 LedControl lc=LedControl(12,10,11,2);  // Pins: DIN,CLK,CS, # of Display connected
 
-unsigned long delayTime=500;  // Delay between Frames
-unsigned long stepTime=50;  
-unsigned long flashTime = 200;
+unsigned long delayTime = 500;  // Delay between Frames
+unsigned long stepTime = 200;  
+unsigned long flashTime = 500;
 
 unsigned long now;
 
@@ -12,6 +14,8 @@ bool field[16][8];
 bool temp[16][8];
 
 bool states[4];
+uint8_t pin_mask[4];
+volatile uint8_t * pin_port[4];
 
 enum Type{
   O,  
@@ -211,7 +215,15 @@ void setup()
   clearScreen();
   states[1] = states[1] = states[1] = states[1] = 0;
 
+  for(int i = 0; i < 4; i++){
+    pin_mask[i] = digitalPinToBitMask(7 - i);
+    pin_port[i] = portInputRegister(digitalPinToPort(7 - i));
+  }
+
   pinMode(7, INPUT);
+  pinMode(6, INPUT);
+  pinMode(5, INPUT);
+  pinMode(4, INPUT);
 }
 
 
@@ -458,6 +470,37 @@ void fallDown(Item item){
   }
   
   while(1){
+    for(int i = 0; i < 4; i++){
+      bool readFromPin = ((*pin_port[i] & pin_mask[i]) != 0);
+      if(!states[i]){
+        if(readFromPin){
+          states[i] = 1;
+        }
+      }else{
+        if(!readFromPin){
+          // Button has been released
+          states[i] = 0;
+          // Do something
+          
+          switch(i){
+            case 0:
+              rotateClockwise(item);
+              break;
+            case 1:
+              moveLeft(item);
+              break;
+            case 2:
+              moveRight(item);
+              break;
+            case 3:
+              moveDown(item);
+              break;  
+          }
+        }
+      }
+    }
+    
+
     if(millis() - now > stepTime){
       now = millis();
       if(isBeneathEmpty(item)){
@@ -472,35 +515,29 @@ void fallDown(Item item){
       }   
     } 
 
-    Serial.print(digitalRead(7));
-//    if(!states[0]){
-//      if(digitalRead(2)){
-//        states[0] = 1;
-//      }
-//    }else{
-//      if(!digitalRead(2)){
-//        // Button has been released
-//        states[0] = 0;
-//        // Do something
-//        moveLeft();
-//      }
-//    }
+    
   }
 }
 
 void rotateClockwise(Item item){
+  
+  Serial.print("Rotate");
    // TODO KIARASH
 }
 
-void moveLeft(){
-  Serial.print("Hello");
+void moveLeft(Item item){
+  Serial.print("Left");
 }
 
-void moveRight(){
+void moveRight(Item item){
+  
+  Serial.print("Right");
   // TODO KIARASH
 }
 
-void moveDown(){
+void moveDown(Item item){
+  
+  Serial.print("Down");
   // TODO KIARASH
 }
 

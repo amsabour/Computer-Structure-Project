@@ -4,7 +4,7 @@
 
 LedControl lc=LedControl(12,10,11,2);  // Pins: DIN,CLK,CS, # of Display connected
 
-unsigned long delayTime = 500;  // Delay between Frames
+unsigned long delayTime = 100;  // Delay between Frames
 unsigned long stepTime = 200;  
 unsigned long flashTime = 500;
 
@@ -521,23 +521,26 @@ void fallDown(Item item){
 
 void rotateClockwise(Item item){
   
-  Serial.print("Rotate");
-   // TODO KIARASH
+  Serial.print("Rotate\n");
+  Serial.flush();
+  // TODO KIARASH
 }
 
 void moveLeft(Item item){
-  Serial.print("Left");
+  Serial.print("Left\n");
+  Serial.flush();
+  // TODO KIARASH
 }
 
 void moveRight(Item item){
-  
-  Serial.print("Right");
+  Serial.print("Right\n");
+  Serial.flush();
   // TODO KIARASH
 }
 
 void moveDown(Item item){
-  
-  Serial.print("Down");
+  Serial.print("Down\n");
+  Serial.flush();
   // TODO KIARASH
 }
 

@@ -489,7 +489,7 @@ void fallDown(Item item){
 }
 
 void rotateClockwise(Item item){
-  
+   // TODO KIARASH
 }
 
 void moveLeft(){
@@ -497,11 +497,11 @@ void moveLeft(){
 }
 
 void moveRight(){
-  
+  // TODO KIARASH
 }
 
 void moveDown(){
-  
+  // TODO KIARASH
 }
 
 void gameOverScreen(){

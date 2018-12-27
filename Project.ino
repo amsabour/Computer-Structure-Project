@@ -4,8 +4,8 @@
 
 LedControl lc=LedControl(12,10,11,2);  // Pins: DIN,CLK,CS, # of Display connected
 
-unsigned long delayTime = 100;  // Delay between Frames
-unsigned long stepTime = 200;  
+unsigned long delayTime = 500;  // Delay between Frames
+unsigned long stepTime = 500;  
 unsigned long flashTime = 500;
 
 unsigned long now;
@@ -472,30 +472,51 @@ void fallDown(Item item){
   while(1){
     for(int i = 0; i < 4; i++){
       bool readFromPin = ((*pin_port[i] & pin_mask[i]) != 0);
-      if(!states[i]){
-        if(readFromPin){
-          states[i] = 1;
+      if(i != 3){
+        if(!states[i]){
+          if(readFromPin){
+            states[i] = 1;
+          }
+        }else{
+          if(!readFromPin){
+            // Button has been released
+            states[i] = 0;
+            // Do something
+          
+            switch(i){
+              case 0:
+                rotateClockwise(&item);
+                break;
+              case 1:
+                moveLeft(&item);
+                break;
+              case 2:
+                moveRight(&item);
+                break;
+              case 3:
+                moveDown(&item);
+                break;  
+            }
+            clearTemp();
+            drawItemToTemp(item);
+            writeToScreen(temp);
+          }
         }
       }else{
-        if(!readFromPin){
-          // Button has been released
-          states[i] = 0;
-          // Do something
-          
-          switch(i){
-            case 0:
-              rotateClockwise(item);
-              break;
-            case 1:
-              moveLeft(item);
-              break;
-            case 2:
-              moveRight(item);
-              break;
-            case 3:
-              moveDown(item);
-              break;  
+        if(!states[i]){
+          if(readFromPin){
+            states[i] = 1;
           }
+        }else{
+          if(!readFromPin){
+            states[i] = 0;
+          }
+        }
+        if(states[i]){
+          moveDown(&item);
+          clearTemp();
+            drawItemToTemp(item);
+            writeToScreen(temp);
         }
       }
     }
@@ -519,29 +540,70 @@ void fallDown(Item item){
   }
 }
 
-void rotateClockwise(Item item){
-  
-  Serial.print("Rotate\n");
-  Serial.flush();
-  // TODO KIARASH
+void rotateClockwise(Item* item){
+  // Fuck it i'll do it myself
+  int newRotation = (item->rotation + 1) % 4;
+
+  for(int i = 0; i < 4; i++){
+    for(int j = 0 ; j < 4; j++){
+      if(types[item->type][newRotation][i][j]){
+        if(!(isIn(item->topX + i, item->topY + j) && !field[item->topX +  i][item->topY + j])){
+          return;
+        }
+      }
+    }
+  }
+
+  item->rotation = newRotation;
 }
 
-void moveLeft(Item item){
-  Serial.print("Left\n");
-  Serial.flush();
-  // TODO KIARASH
+bool isIn(int x, int y){
+  return (x >= 0) && (x < 16) && (y >= 0) && (y < 8);
 }
 
-void moveRight(Item item){
-  Serial.print("Right\n");
-  Serial.flush();
-  // TODO KIARASH
+void moveLeft(Item* item){
+  // Fuck it i'll do it myself
+  for(int i = 0; i < 4; i++){
+    for(int j= 0 ; j < 4; j++){
+      if(types[item->type][item->rotation][i][j]){
+        if(!(isIn(item->topX + i, item->topY - 1 + j) && !field[item->topX+  i][item->topY - 1 + j])){
+          return;
+        }
+      }
+    }
+  }
+
+  item->topY-=1;
 }
 
-void moveDown(Item item){
-  Serial.print("Down\n");
-  Serial.flush();
-  // TODO KIARASH
+void moveRight(Item* item){
+  // Fuck it i'll do it myself  
+  for(int i = 0; i < 4; i++){
+    for(int j= 0 ; j < 4; j++){
+      if(types[item->type][item->rotation][i][j]){
+        if(!(isIn(item->topX + i, item->topY + 1 + j) && !field[item->topX+ i ][item->topY + 1 + j])){
+          return;
+        }
+      }
+    }
+  }
+
+  item->topY += 1;
+}
+
+void moveDown(Item* item){
+  // Fuck it i'll do it myself  
+  for(int i = 0; i < 4; i++){
+    for(int j= 0 ; j < 4; j++){
+      if(types[item->type][item->rotation][i][j]){
+        if(!(isIn(item->topX + i + 1, item->topY + j) && !field[item->topX + i + 1][item->topY + j])){
+          return;
+        }
+      }
+    }
+  }
+
+  item->topX += 1;
 }
 
 void gameOverScreen(){

@@ -7,6 +7,8 @@ LedControl lc=LedControl(12,10,11,2);  // Pins: DIN,CLK,CS, # of Display connect
 unsigned long delayTime = 500;  // Delay between Frames
 unsigned long stepTime = 500;  
 unsigned long flashTime = 500;
+unsigned long endScreenTime = 100;
+
 
 unsigned long now;
 
@@ -461,12 +463,11 @@ void checkForCompleteRow(){
   clearTemp();
 }
 
-void fallDown(Item item){
+bool fallDown(Item item){
   drawItemToTemp(item);
   writeToScreen(temp);  
   if(!isValid(item)){
-    clearScreen();
-    return;
+    return true;
   }
   
   while(1){
@@ -515,8 +516,8 @@ void fallDown(Item item){
         if(states[i]){
           moveDown(&item);
           clearTemp();
-            drawItemToTemp(item);
-            writeToScreen(temp);
+          drawItemToTemp(item);
+          writeToScreen(temp);
         }
       }
     }
@@ -538,6 +539,7 @@ void fallDown(Item item){
 
     
   }
+  return false;
 }
 
 void rotateClockwise(Item* item){
@@ -607,14 +609,39 @@ void moveDown(Item* item){
 }
 
 void gameOverScreen(){
-  // Game is over. Do something cool.
-  // TODO MOOSIO
-  delay(1000);
+  for(int i = 0; i < 8; i++){
+    for(int j = 0; j < 16; j++){
+      if(j % 2 == 0){
+        temp[j][7 - i] = 1;
+      }else{
+        temp[j][i] = 1;
+      }
+    }
+    writeToScreen(temp);
+    delay(endScreenTime);
+  }
+
+  for(int i = 0; i < 8; i++){
+    for(int j = 0; j < 16; j++){
+      if(j % 2 == 0){
+        temp[j][7 - i] = 0;
+      }else{
+        temp[j][i] = 0;
+      }
+    }
+    writeToScreen(temp);
+    delay(endScreenTime);
+  }
+
   clearScreen();
 }
 
 bool isGameOver(){
-  // TODO
+  for(int i = 0 ; i < 8; i++){
+    if(field[0][i]){
+      return true;
+    }
+  }
   return false;
 }
 //#########################################################################
@@ -625,11 +652,11 @@ void loop()
   while(1){
     delay(delayTime);
     Item item = createObject();
-    fallDown(item);
+    bool gg = fallDown(item);
     checkForCompleteRow();
-//    if(isGameOver()){
-//      gameOverScreen();
-//    }
+    if(gg || isGameOver()){
+      gameOverScreen();
+    }
   }
 }
 
